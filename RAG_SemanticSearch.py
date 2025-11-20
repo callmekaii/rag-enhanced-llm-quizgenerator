@@ -1,7 +1,7 @@
 from pdfprocessor import process_pdf
-def score_chunks():
+#for instance query = writer in this case
+def score_chunks(query = "writer"):
     scored_chunks = []
-    query = "writer"
     for chunk in chunks:
         score = 0
         split_chunk = chunk.split()
@@ -15,7 +15,7 @@ def get_top_chunks(scored_chunks, top_n=5):
     scored_chunks.sort(key=lambda x: x[1], reverse=True)
     return scored_chunks[:top_n]
 
-path_to_pdf = r"D:\Github\rag-enhanced-llm-quizgen\.venv\PDF Sample\3.0 - Overview of Game Design.pdf"
+path_to_pdf = r"D:\Github\rag-enhanced-llm-quizgenerator\.venv\PDF Sample\3.0 - Overview of Game Design.pdf"
 chunks = process_pdf(path_to_pdf)
 
 
@@ -33,6 +33,8 @@ def debug_print_top_chunks(sorted_top_chunks):
 
 #Main function to get the best chunk
 def get_best_chunk(sorted_top_chunks):
-    print("Best chunk: " + sorted_top_chunks[0][0])
+    # print("Best chunk: " + sorted_top_chunks[0][0])
     return sorted_top_chunks[0][0]
+
+get_best_chunk(sorted_top_chunks)
 
