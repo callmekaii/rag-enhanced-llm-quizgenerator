@@ -1,14 +1,21 @@
 from pdfprocessor import process_pdf
 #for instance query = writer in this case
-def score_chunks(query = "writer"):
+def score_chunks(query = "game design"):
+    query_terms = query.lower().split()  # multiple terms
     scored_chunks = []
+
     for chunk in chunks:
         score = 0
-        split_chunk = chunk.split()
-        for word in split_chunk:
-            if word.lower() == query.lower():
-                score += 10
+        split_chunk = chunk.lower().split()
+
+        for term in query_terms:
+            for word in split_chunk:
+                # exact word match — you can make this fuzzy later if needed
+                if word == term:
+                    score += 10
+
         scored_chunks.append((chunk, score))
+
     return scored_chunks
 
 def get_top_chunks(scored_chunks, top_n=5):

@@ -1,10 +1,34 @@
 import llmintegration
 import RAG_SemanticSearch
 #This is the part where VARK assessment is going to be implemented
+Answers = [0, 0]
+user_preference = ""
+def VarkAssessment():
+        # [Auditory count, Read/Write count]
+        for i in range(1, 11):
+            while True:
+                Answer = input(f"Please enter the correct answer for Question {i} (A or B): ")
+                if Answer.upper() == 'A':
+                    Answers[0] += 1
+                    break
+                elif Answer.upper() == 'B':
+                    Answers[1] += 1
+                    break
+                else:
+                    print("Invalid input. Please enter A or B.")
+        if Answers[0] > Answers[1]:
+            print(f"You prefer the Auditory learning style with {Answers[0]} out of 10 answers.")
+            user_preference = "Auditory"
+        elif Answers[1] > Answers[0]:
+            print(f"You prefer the Read/Write learning style with {Answers[1]} out of 10 answers.")
+            user_preference = "R/W"
+        else:
+            print(f"You have a balanced preference between Auditory and Read/Write learning styles with {Answers[0]} out of 10 answers each.")
+            user_preference = "Balanced"
+
 try:
-    # path_to_pdf = r"D:\Github\rag-enhanced-llm-quizgenerator\.venv\PDF Sample\3.0 - Overview of Game Design.pdf"
-    # chunks = process_pdf(path_to_pdf)
-    with llmintegration.model.chat_session(system_prompt='''You are an expert educational survey content generator. Your task is to create multiple-choice quiz questions strictly following the VARK learning style framework (Auditory, Read/Write). 
+    with llmintegration.model.chat_session(system_prompt='''
+You are an expert educational survey content generator. Your task is to create multiple-choice quiz questions strictly following the VARK learning style framework (Auditory, Read/Write). 
 
 INSTRUCTIONS:
 1. Generate exactly **10 questions per text excerpt**.
@@ -30,28 +54,42 @@ B. ...'''):
         response = llmintegration.model.generate("Generate the quiz using the provided text excerpt: "+RAG_SemanticSearch.get_best_chunk(RAG_SemanticSearch.sorted_top_chunks), max_tokens=3000, n_batch=2048)
         print("Quiz Generation Response:\n", response)
 
-        # [Auditory count, Read/Write count]
-        Answers = [0, 0]
-        for i in range(1, 11):
-            while True:
-                Answer = input(f"Please enter the correct answer for Question {i} (A or B): ")
-                if Answer.upper() is 'A':
-                    Answers[0] += 1
-                    break
-                elif Answer.upper() in 'B':
-                    Answers[1] += 1
-                    break
-                else:
-                    print("Invalid input. Please enter A or B.")
-        if Answers[0] > Answers[1]:
-            print(f"You prefer the Auditory learning style with {Answers[0]} out of 10 answers.")
-            user_preference = "Auditory"
-        elif Answers[1] > Answers[0]:
-            print(f"You prefer the Read/Write learning style with {Answers[1]} out of 10 answers.")
-            user_preference = "R/W"
-        else:
-            print(f"You have a balanced preference between Auditory and Read/Write learning styles with {Answers[0]} out of 10 answers each.")
-            user_preference = "Balanced"
+        #Now with the questions, we assess the user's learning style
+        VarkAssessment()
+    teaching_prompt = f"""
+    You are now an adaptive educator.
+
+    The user's learning preference is: {user_preference}.
+
+    Using ONLY the following text excerpt:
+    ---
+    {RAG_SemanticSearch.get_best_chunk(RAG_SemanticSearch.sorted_top_chunks)}
+    ---
+
+    Generate **10 adaptive quiz questions** formatted EXACTLY like this:
+
+    Question 1: <question text>
+    A. <choice>  
+    B. <choice>  
+    C. <choice>  
+    D. <choice>
+
+    REQUIREMENTS:
+    - The teaching should match the user's learning style:
+    - If Auditory: choices and questions should involve listening, spoken instructions, audio cues, discussion-based tasks.
+    - If Read/Write: choices and questions should involve reading, writing, lists, summaries, note-taking.
+    - Each option should clearly reflect the user's learning style.
+    - DO NOT mention VARK, learning styles, or explain why these questions were chosen.
+    - DO NOT add extra commentary.
+    - Only output the questions with A–D choices.
+
+    Begin now:
+    """
+
+    teaching_response = llmintegration.model.generate(teaching_prompt, max_tokens=3000)
+    print("\n\nAdapted Teaching Output:\n")
+    print(teaching_response)
+
 
         
             
