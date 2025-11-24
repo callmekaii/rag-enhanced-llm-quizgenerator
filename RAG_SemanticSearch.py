@@ -1,6 +1,6 @@
 from pdfprocessor import process_pdf
 #for instance query = writer in this case
-def score_chunks(query = "game design"):
+def score_chunks(query):
     query_terms = query.lower().split()  # multiple terms
     scored_chunks = []
 
@@ -22,12 +22,15 @@ def get_top_chunks(scored_chunks, top_n=5):
     scored_chunks.sort(key=lambda x: x[1], reverse=True)
     return scored_chunks[:top_n]
 
-path_to_pdf = r"D:\Github\rag-enhanced-llm-quizgenerator\.venv\PDF Sample\3.0 - Overview of Game Design.pdf"
+path_to_pdf = r"D:\Github\rag-enhanced-llm-quizgenerator\.venv\PDF Sample\Chapter 5 - Resource Management.pdf"
 chunks = process_pdf(path_to_pdf)
 
+def user_query_input():
+    return input("Enter your query to find relevant text chunks: ")
+# scored_chunks = score_chunks()
 
-scored_chunks = score_chunks()
-sorted_top_chunks = get_top_chunks(scored_chunks)
+user_query_input = user_query_input()
+sorted_top_chunks = get_top_chunks(score_chunks(user_query_input))
 
 #Debug function to print top chunks with scores
 def debug_print_top_chunks(sorted_top_chunks):

@@ -1,19 +1,20 @@
 import gpt4all
+import torch
 from pdfprocessor import process_pdf
 from RAG_SemanticSearch import get_best_chunk, sorted_top_chunks
 
 def initialize_model(model_path):
     model = gpt4all.GPT4All(model_path, model_type='gguf', 
                             allow_download=False,
-                            device='gpu',)
+                            device='cuda')
     return model
 
 def generate_response(model, prompt, max_tokens=1000):
-    response = model.generate(prompt, max_tokens=max_tokens, n_batches=1024)
+    response = model.generate(prompt, max_tokens=max_tokens, n_batches=4)
     return response
 
 #model declaration
-model = initialize_model(r"D:\Github\rag-enhanced-llm-quizgenerator\.venv\LLM\Meta-Llama-3.1-8B-Instruct-128k-Q4_0.gguf")
+model = initialize_model(r"D:\Github\rag-enhanced-llm-quizgenerator\.venv\LLM\gemma-2-9b-it-q8_0.gguf")
 #VARK model learner type assessment quiz generation
 # try:
 #     # path_to_pdf = r"D:\Github\rag-enhanced-llm-quizgenerator\.venv\PDF Sample\3.0 - Overview of Game Design.pdf"

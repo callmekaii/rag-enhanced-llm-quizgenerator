@@ -54,19 +54,21 @@ B. ...'''):
         response = llmintegration.model.generate("Generate the quiz using the provided text excerpt: "+RAG_SemanticSearch.get_best_chunk(RAG_SemanticSearch.sorted_top_chunks), max_tokens=3000, n_batch=2048)
         print("Quiz Generation Response:\n", response)
 
-        #Now with the questions, we assess the user's learning style
-        VarkAssessment()
+    #Now with the questions, we assess the user's learning style
+    VarkAssessment()
+    # user_query = input("Enter your basis of query for adaptive questions: ")
+        
     teaching_prompt = f"""
     You are now an adaptive educator.
 
     The user's learning preference is: {user_preference}.
-
+    The user has asked for questions based on their topic: {RAG_SemanticSearch.user_query_input}.
     Using ONLY the following text excerpt:
     ---
     {RAG_SemanticSearch.get_best_chunk(RAG_SemanticSearch.sorted_top_chunks)}
     ---
 
-    Generate **10 adaptive quiz questions** formatted EXACTLY like this:
+    Generate **10 quiz questions** with 4 multiple choices formatted EXACTLY like this:
 
     Question 1: <question text>
     A. <choice>  
@@ -81,7 +83,7 @@ B. ...'''):
     - Each option should clearly reflect the user's learning style.
     - DO NOT mention VARK, learning styles, or explain why these questions were chosen.
     - DO NOT add extra commentary.
-    - Only output the questions with A–D choices.
+    - Only output the questions with A to D choices.
 
     Begin now:
     """
