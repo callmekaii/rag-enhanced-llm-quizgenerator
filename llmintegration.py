@@ -1,7 +1,4 @@
 import gpt4all
-import torch
-from pdfprocessor import process_pdf
-from RAG_SemanticSearch import get_best_chunk, sorted_top_chunks
 
 def initialize_model(model_path):
     model = gpt4all.GPT4All(model_path, model_type='gguf', 

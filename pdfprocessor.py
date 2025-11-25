@@ -1,44 +1,45 @@
-import pdfplumber
-import re
-import os
+import fill_DB
+from langchain_community.document_loaders import PyPDFDirectoryLoader
+from langchain_text_splitters import RecursiveCharacterTextSplitter
 
+# Initialize the text splitter with chunk size and overlap
+text_splitter = RecursiveCharacterTextSplitter(chunk_size=400, 
+                                               chunk_overlap=100, 
+                                               length_function=len,
+                                               is_separator_regex=False)
+
+# Initialize empty lists to hold documents, ids, and metadata
+documents = []
+ids = []
+metadatas = []
+
+# Function to extract text from PDF
 def extract_text_from_pdf(path):
-    text = ""
-    with pdfplumber.open(path) as pdf:
-        for page in pdf.pages:
-            t = page.extract_text()
-            if t:
-                text += t + "\n\n"
-    return clean_text(text)
+    loader = PyPDFDirectoryLoader(path)
+    raw_documents = loader.load()
+    return raw_documents
 
-def clean_text(text):
-    # remove page numbers like "12" or "Page 12"
-    text = re.sub(r"\bPage\s*\d+\b", "", text, flags=re.IGNORECASE)
-    text = re.sub(r"^\s*\d+\s*$", "", text, flags=re.MULTILINE)
-
-    # collapse extra spaces
-    text = re.sub(r"\s{2,}", " ", text)
-    return text.strip()
-
-def chunk_text(text, chunk_size=400):
-    words = text.split()
-    chunks = []
-    for i in range(0, len(words), chunk_size):
-        chunk = " ".join(words[i:i+chunk_size])
-        chunks.append(chunk)
+# Function to split raw documents into chunks
+def text_chunker(raw_documents):
+    chunks = text_splitter.split_documents(raw_documents)
     return chunks
 
-def process_pdf(path, chunk_size=400):
-    raw = extract_text_from_pdf(path)
-    chunks = chunk_text(raw, chunk_size)
-    return chunks
+# Function to append the content to the lists
+def append_contents_to_var(chunks):
+    for i, chunk in enumerate(chunks):
+        documents.append(chunk.page_content)
+        ids.append(f"id_{i}")
+        metadatas.append(chunk.metadata)
+        # print(f"Metadata for chunk {i}: {chunk.page_content[:200]}...")  # Print first 50 characters of the chunk for reference
 
-# #checks if the file exists (prolly a good idea to have this here or make it into try-except itf)
-# path = r"D:\Github\rag-enhanced-llm-quizgen\3.0 - Overview of Game Design.pdf"
-# print(os.path.exists(path))
+# Main processing flow
+raw_documents = extract_text_from_pdf(r".venv/PDF Sample")  # Change the path to your PDF directory
+chunks = text_chunker(raw_documents)  # Get the chunks from the raw documents
+append_contents_to_var(chunks)  # Pass the chunks into the function
 
-# chunks = process_pdf(r"D:\Github\rag-enhanced-llm-quizgen\3.0 - Overview of Game Design.pdf")
+# Upsert the processed documents into the ChromaDB collection
+fill_DB.collection.upsert(documents=documents,
+                          metadatas=metadatas,
+                          ids=ids)
 
-# print("Total chunks:", len(chunks))
-# print(chunks[2])   # preview the chunk idk man
-
+print("PDF chunks have been processed and stored in ChromaDB.")

@@ -5,6 +5,8 @@ Answers = [0, 0]
 user_preference = ""
 def VarkAssessment():
         # [Auditory count, Read/Write count]
+        global user_preference
+        global Answers
         for i in range(1, 11):
             while True:
                 Answer = input(f"Please enter the correct answer for Question {i} (A or B): ")
@@ -51,7 +53,7 @@ B. Read notes or write a summary of each role (Read/Write)
 Question 2: [Next question text]
 A. ...
 B. ...'''):
-        response = llmintegration.model.generate("Generate the quiz using the provided text excerpt: "+RAG_SemanticSearch.get_best_chunk(RAG_SemanticSearch.sorted_top_chunks), max_tokens=3000, n_batch=2048)
+        response = llmintegration.model.generate("Generate the quiz using the provided text excerpt: "+str(RAG_SemanticSearch.results["documents"]), max_tokens=3000, n_batch=2048)
         print("Quiz Generation Response:\n", response)
 
     #Now with the questions, we assess the user's learning style
@@ -65,7 +67,7 @@ B. ...'''):
     The user has asked for questions based on their topic: {RAG_SemanticSearch.user_query_input}.
     Using ONLY the following text excerpt:
     ---
-    {RAG_SemanticSearch.get_best_chunk(RAG_SemanticSearch.sorted_top_chunks)}
+    {str(RAG_SemanticSearch.results['documents'])}
     ---
 
     Generate **10 quiz questions** with 4 multiple choices formatted EXACTLY like this:
